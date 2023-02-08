@@ -1,0 +1,159 @@
+---
+title: "Week 1 Class"
+author: "Meredith Rolfe"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| 
+
+library(tidyverse)
+library(googlesheets4)
+library(igraph)
+library(statnet)
+```
+
+## Network from Adjacency matrix
+
+Sometimes you will find the networks in adjacency matrix format. For example, most maps can also be represented as a geographic network of contiguous regions, like so:
+
+![Example of Adjacency Matrix](data/got/adj_regions.png)
+
+These data can be read in using the `igraph` or `statnet` packages, indicating the format of the data. In the example here, I take three steps to create a network:
+
+1.  read in the original data
+
+2.  transform the data into igraph format, taking the matrix of 0s and 1s, and ignoring the column and row labels and region specific variables (i.e., vertex or node attributes) such as "color"
+
+3.  Set the node (and/or edge) attributes manually
+
+```{r}
+got_regions<-read_csv("../data/got/got_regions.csv")
+
+got_region.net<-graph_from_adjacency_matrix(as.matrix(got_regions[,2:13]))%>%
+  set_vertex_attr("color", value=got_regions$Color)
+```
+
+Now, we can easily visualize our "network." Note that I set the graphical parameter margins to 0 on all sides to maximize the available viewing space, and turned off arrows since this isn't a directed network.
+
+```{r}
+plot.igraph(got_region.net, 
+            margin=0,
+            arrow.mode="-")
+```
+
+Oh no! What a mess! This is because of standard network plotting algorithms using spring embedding or similar and so distances get compressed. Getting distances right is a constant headache for network visualizations. So, lets try getting estimated distances and seeing if we can improve things.
+
+## Network from Edgelist
+
+Now we want to add an edge attribute - similar to our vertex attributes but applying to the links that exist between regions. So, lets try this out for our Westeros regions. It turns out that the dataset available is already in the form of an edgelist with edge attributes, as shown below.
+
+![Distance Edgelist](images/distances.png)
+
+By inspection, we can see the standard `from` and `to` structure of an edgelist. Additionally, we can see that `from` nodes are embedded within `region_from`. Embedded or multilevel nodes are not uncommon - people may be embedded within families or organizations, cities are embedded within states, and so on - so it is good to pay attention and be proactive in deciding the level of analysis you plan to work with - the additional information can be transformed into a node attribute and used as a secondary grouping variable.
+
+Additionally, we can see two edge attributes: `Miles` and `Mode`. In this particular dataset, `Miles` will serve as the **weight** attribute for our edgelist.
+
+To create a new weighted network, lets follow the same steps as above.
+
+I take three steps to create a network:
+
+1.  read in the original data. I relocate the first column to prepare for transformation into edgelist format for step 2.
+
+2.  transform the data into igraph format, with the first two columns as "from" and "to" respectively, and specifying an undirected (symmetric) network.
+
+3.  Set the node (and/or edge) attributes manually. In this case, we just create a new `weight` attribute that is an exact copy of `Miles`. Keeping both copies makes it easier to swap around weight attributes in the future without losing information.
+
+```{r}
+got_distance<-read_csv("../data/got/got_distances.csv")%>%
+  relocate(`Region From`, .after = Mode)
+
+got_distance.net<-graph_from_data_frame(got_distance,
+                                      directed=FALSE)
+
+E(got_distance.net)$weight<-E(got_distance.net)$Miles
+
+```
+
+The resulting igraph object works a lot like a standard data frame. For example, we can get a summary of the object by just typing the object name. Similarly, we can get a list of unique vertex names (place names) by printing the object. Or a list of unique regions by recalling that edge attribute.
+
+```{r}
+got_distance.net
+
+head(V(got_distance.net)$name)
+
+unique(E(got_distance.net)$`Region From`)
+```
+
+Graph objects can recognize and work with standard names like `weight` or `color`, and then use those attributes when graphing or doing calculations. For example, lets set the color attribute of places by region.
+
+## Matching Vertex Attributes (Adv.)
+
+We need to first create a vector attribute for region - right now we only have an edge attribute! However, this can be a bit tricky, because the order of the nodes may not be the same as the order of our data frame.
+
+```{r}
+
+temp<-got_distance%>%
+  mutate(region=`Region From`)%>%
+  select(From, region)%>%
+  distinct()
+
+regions<-got_distance%>%
+  pivot_longer(cols=c(From, To), names_to = "type",
+               values_to = "place")%>%
+  select(type, place, `Region From`)%>%
+  left_join(temp, by=c("place"="From"))%>%
+  mutate(region = ifelse(is.na(region), `Region From`, region))%>%
+  select(place, region)%>%
+  distinct()%>%
+  mutate(region = case_when(
+    place == "the Crownlands" ~ "Crownlands",
+    place == "the Vale" ~ "Vale",
+    place == "Bear Island" ~ "North",
+    str_detect(place, "Dornish") ~ "Dorne",
+    TRUE ~ region))
+rm(temp)
+
+#this command finds the index we need
+match(V(got_distance.net)$name, regions$place)
+
+got_distance.net<-got_distance.net%>%
+  set_vertex_attr("region",
+                  value=regions$region[match(V(got_distance.net)$name, regions$place)])
+
+```
+
+# Set Color and Plot
+
+Now that we have the vertex attribute set, lets create a color attribute and try graphing. To change region names into color names, we can go back and reuse the colors from our original `got_regions` dataset.
+
+```{r}
+#lets make sure we have the correct match statement
+match(V(got_distance.net)$region, got_regions$Region)
+
+V(got_distance.net)$color <- got_regions$Color[match(V(got_distance.net)$region, got_regions$Region)]
+
+```
+
+Color set, lets try a basic plot. Oh no!!
+
+```{r}
+plot.igraph(got_distance.net, 
+            margin=0, 
+            arrow.mode="-")
+```
+
+Lets see if we can alter some graphical parameters to make things easier to handle.
+
+```{r}
+plot.igraph(got_distance.net, 
+            label.cex = .2,
+            vertex.size=0,
+            arrow.mode = "-",
+            vertex.label.color=V(got_distance.net)$color)
+```
+
+## Another Edgelist - Challenge!
