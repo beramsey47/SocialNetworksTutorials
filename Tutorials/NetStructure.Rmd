@@ -22,8 +22,13 @@ load("Week2.rdata")
 tutorial_options(exercise.timelimit = 10)
 ```
 
+<<<<<<< HEAD
 ##Introduction This tutorial will demonstrate several R commands used to
 describe aspects of network structure introduced in the Week 2 Lecture:
+=======
+## Introduction
+This tutorial will demonstrate several R commands used to describe aspects of network structure introduced in the Week 2 Lecture:
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 -   Dyads and Dyad Census
 -   Triads and Triad Census
@@ -57,7 +62,11 @@ times were removed.
 -   *gotbook.ig* - igraph network object
 -   *gotbook.stat* - statnet network object
 
+<<<<<<< HEAD
 \##**Describe the Network Data**
+=======
+## **Describe the Network Data**
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 Review of Week 1. Exercise to describe both data sets, using Week 1
 NetDescribe tutorial for guidance.
@@ -143,8 +152,13 @@ network::list.vertex.attributes(gotbook.stat)
 network::list.edge.attributes(gotbook.stat)
 ```
 
+<<<<<<< HEAD
 \##**Dyad Census** Let's try a full **dyad census**. This gives us the
 number of dyads where the relationship is:
+=======
+## **Dyad Census**
+Let's try a full **dyad census**. This gives us the number of dyads where the relationship is:
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 -   Reciprocal (mutual), or `mut`
 -   Asymmetric (non-mutual), or `asym`, and
@@ -171,7 +185,7 @@ to use a statnet command on an igraph object or vice versa. As you can
 see, the two commands return the same answer, but the statnet format is
 compact and easier to read and doesn't return a warning.
 
-###Exercise: Dyad Census
+### Exercise: Dyad Census
 
 Now, using commands from either statnet or igraph, conduct a dyad census
 of the "climate" network. Be sure to use the correct network data format
@@ -190,7 +204,7 @@ igraph::dyad.census(climate.ig)
 sna::dyad.census(climate.stat)
 ```
 
-<!-- ##Reciprocity -->
+<!-- ## Reciprocity -->
 
 <!-- grecip -->
 
@@ -200,6 +214,7 @@ sna::dyad.census(climate.stat)
 
 <!-- dyadic-nonnull is (m)/(m+a) -->
 
+<<<<<<< HEAD
 \##**Triad Census** While it is easy to think of social networks as
 comprised of dyadic interactions, network scholars are more likely to
 describe the triad as the true building block of network structure.
@@ -209,6 +224,10 @@ observers can influence which chicken wins a dyadic pecking order
 battle. The triad census provides a fundamental descriptive insight into
 the types of triads found in a particular dataset - refer to the lecture
 for more details on interpretation.
+=======
+## **Triad Census**
+While it is easy to think of social networks as comprised of dyadic interactions, network scholars are more likely to describe the triad as the true building block of network structure. Dyadic interactions are always conducted in the shadow of one or more third parties that can shape the outcome, just like third party observers can influence which chicken wins a dyadic pecking order battle. The triad census provides a fundamental descriptive insight into the types of triads found in a particular dataset - refer to the lecture for more details on interpretation.
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 ```{r triad-example, echo=TRUE}
 #Classify all triads in the network: igraph
@@ -250,7 +269,7 @@ networks. If the number of triads still appears quite large, it is
 because some unordered triads are being counted multiple times (i.e.,
 the results are much harder to interpret for undirected networks).
 
-###Exercise: Triad Census
+### Exercise: Triad Census
 
 Now, using commands from either statnet or igraph, conduct a triad
 census of the `climate` network. Be sure to use the correct network data
@@ -269,7 +288,11 @@ igraph::triad.census(climate.ig)
 sna::triad.census(climate.stat)
 ```
 
+<<<<<<< HEAD
 \##**Transitivity or Global Clustering**
+=======
+## **Transitivity or Global Clustering**
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 While a triad census is interesting, it is highly descriptive and we may
 want a shorter reference point to understand the level of transitivity
@@ -288,10 +311,15 @@ networks.](https://toreopsahl.com/tnet/weighted-networks/clustering/)
 transitivity(gotbook.ig)
 ```
 
+<<<<<<< HEAD
 ###Exercise: Transitivity Now, compute the **global** transitivity of
 the climate network. Comparing results from the triad census to the
 overall transtivity measure, what have we learned about the network
 structure?
+=======
+### Exercise: Transitivity
+Now, compute the **global** transitivity of the climate network. Comparing results from the triad census to the overall transtivity measure, what have we learned about the network structure?
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 ```{r trans, exercise=TRUE}
 #get network transitivity
@@ -323,6 +351,7 @@ Note, there are also methods for weighted networks available in
 `sna::gtrans()`, rank and correlation, along with the relevant
 references.
 
+<<<<<<< HEAD
 \##**Local Transivity or Clustering** As we will explore more in future
 weeks, actors may be affected by the level of transitivity within their
 local ego networks. **Local transitivity**, more commonly known as the
@@ -332,6 +361,10 @@ density of an ego network. Lets compare the transitivity of the local
 ego networks of Petyr Baelish, Jon Snow, and Daenerys Targaryen.
 Reminder: an inroduction to the R commands `[]` and `c()` is available
 in the RBasics tutorial (NOT YET AVAILABLE).
+=======
+## **Local Transivity or Clustering**
+As we will explore more in future weeks, actors may be affected by the level of transitivity within their local ego networks. **Local transitivity**, more commonly known as the **local clustering coefficient**, is a technical description of how many of your friends are also friends with each other - it is just the density of an ego network. Lets compare the transitivity of the local ego networks of Petyr Baelish, Jon Snow, and Daenerys Targaryen. Reminder: an inroduction to the R commands `[]` and `c()` is available in the RBasics tutorial (NOT YET AVAILABLE). 
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 ```{r, echo=TRUE}
 #Retrive a list of the three vertices we are interested in
@@ -354,16 +387,21 @@ coefficient.
 ```{r, echo=TRUE}
 #get global clustering cofficient: igraph
 transitivity(gotbook.ig, type="global")
-##get average local clustering coefficient: igraph
+## get average local clustering coefficient: igraph
 transitivity(gotbook.ig, type="average")
 
 ```
 
+<<<<<<< HEAD
 ###Exercise: Local Clustering Compute the **local** clustering
 coefficient of three other vertices in the game of thrones network:
 Tyrion Lannister, Cersei Lannister and Arya Stark. What do the
 differences in values between these two vertices, and the example
 vertices say about these members of the network?
+=======
+### Exercise: Local Clustering
+Compute the **local** clustering coefficient of three other vertices in the game of thrones network: Tyrion Lannister, Cersei Lannister and Arya Stark. What do the differences in values between these two vertices, and the example vertices say about these members of the network?
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 ```{r localtrans, exercise=TRUE}
 #check ego network transitivity: igraph
@@ -393,7 +431,11 @@ transitivity(climate.ig, type="average")
 
 ```
 
+<<<<<<< HEAD
 \##**ADVANCED: Path Length and Geodesic**
+=======
+## **ADVANCED: Path Length and Geodesic** 
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 We often are interested in the shortest path, or distance, between two
 nodes. The `distances` command calculates the distances between two or
@@ -435,7 +477,11 @@ average.path.length(gotbook.ig,directed=F)
 
 Compare the results of the two previous commands. What can you learn?
 
+<<<<<<< HEAD
 \##**ADVANCED Component Structure and Membership**
+=======
+## **ADVANCED Component Structure and Membership**
+>>>>>>> 168164400fc5153ae96bf08e290e023e6daf6dbe
 
 First, let's look at the network component structure. This gives a list
 with: membership by node, size of each component, and the total number
@@ -461,7 +507,7 @@ isolates(gotbook.stat)
 as.vector(gotbook.stat%v%'vertex.names')[c(isolates(gotbook.stat))]
 ```
 
-###Exercise: Component Structure and Membership
+### Exercise: Component Structure and Membership
 
 Now, let's do the same inspections for the climate data. Retrive the
 size of each component and the total number of components.

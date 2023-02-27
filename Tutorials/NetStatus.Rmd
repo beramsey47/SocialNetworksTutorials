@@ -16,7 +16,7 @@ load("Week4.rdata")
 tutorial_options(exercise.timelimit = 10)
 ```
 
-##**Introduction**
+## **Introduction**
 
 This tutorial will demonstrate use of the R commands used to measure aspects of network status introduced in Week 4's Lecture:
 
@@ -40,7 +40,7 @@ The third dataset is from the IMF, and a tie represents the value of a country's
 - *imf2014.stat* - statnet network object
 - *imf100.stat* - (0/1) tie when nation holds >100million in securities
 
-##**Basic Network Description**
+## **Basic Network Description**
 
 Inspect the basic network descriptors for the `imf2014` network. For this exercise, refer to Week 1 tutorial. This will help you get familiar with the dataset you are using.
 
@@ -50,7 +50,7 @@ Find network size, type (un/directed, un/weighted, bipartite) and available attr
 #Find network size and type
 ```
 
-##**Basic Network Structure**
+## **Basic Network Structure**
 
 Inspect the dyads, triads, and component structure of the `imf2014` and `gotlike` networks (refer to tutorial 2):
 
@@ -100,20 +100,20 @@ head(gotlike.nodes)
 
 ```
 
-##**Eigenvector Centrality**
+## **Eigenvector Centrality**
 
 We use `evcent` to calculate node level eigenvector centrality scores in statnet, and the familiar `centralization` score with the correct option to calculate network centralization. We are using the `head` command to just view the first few scores.
 
 ```{r , echo=TRUE}
-##calculate eigenvector centrality scores: statnet
+## calculate eigenvector centrality scores: statnet
 head(evcent(imf2014.stat, ignore.eval=TRUE))
-##calculate eigenvector centralization index: statnet
+## calculate eigenvector centralization index: statnet
 centralization(imf2014.stat, evcent)
 ```
 
 The igraph command outputs a list of results that can be accessed by name. The eigenvector centrality score for each node can be accessed by calling `$vector`. Another element that might be of interest is the graph level eigenvector centralization score, `$centralization`. 
 ```{r , echo=TRUE}
-##calculate eigenvector centrality scores: igraph
+## calculate eigenvector centrality scores: igraph
 temp<-centr_eigen(imf2014.ig,directed=T)
 names(temp)
 length(temp$vector)
@@ -136,7 +136,7 @@ arrange(imf2014.nodes, desc(eigen)) %>%
   slice(1:5)
 ```
 
-###Exercise: Eigenvector Centrality
+### Exercise: Eigenvector Centrality
 Create a similar table of the eigenvector values for the `gotlike` dataset, and find the 5 nodes with highest eigenvector centralitiy.
 
 ```{r eigen, exercise=TRUE}
@@ -155,7 +155,7 @@ arrange(gotlike.nodes, desc(eigen)) %>%
 
 ```
 
-###ADVANCED Exercise 2: Eigenvector Centrality
+### ADVANCED Exercise 2: Eigenvector Centrality
 Now try creating a similar table of the eigenvector centrality values for the `imf100` version of the imf2014 data, and find the 5 nodes with highest eigenvector centralitiy. There is no existing imf100.node dataframe, and it will need to be created.
 
 ```{r eigen2, exercise=TRUE}
@@ -177,7 +177,7 @@ arrange(imf100.nodes, desc(eigen)) %>%
   slice(1:5)
 ```
 
-##**Bonacich Power Centrality**
+## **Bonacich Power Centrality**
 
 Now, let's try calculating the node-level bonacich power centrality score. This gives us the bonacich power score for each node. Once again, we will only return the first few values using `head`.
 
@@ -192,7 +192,7 @@ This time, the two approaches are pretty similar. There is one exception visible
 
 Note that the routine used by `bonpow()` doesn't appear to incorporate weights, and fails when the adjacency matrix is singular. A matrix is singular when any column can be expressed as a linear combinaton of other columns, as might be found if a node has no connections or if two nodes have the same pattern of friendships). Singular matrices are therefore more likely when weights are ignored. If `bonpow()` returns NaN for all nodes, try substituting `power_centrality()`.
 
-###Exercise: Bonacich Power Centrality
+### Exercise: Bonacich Power Centrality
 
 Add the bonachic power centrality scores to the `gotlike.nodes` dataset, and view the nodes with the five highest scores.
 
@@ -231,7 +231,7 @@ arrange(gotbook.nodes, desc(bonpow)) %>%
 
 ```
 
-##**Derived and Reflected Centrality**
+## **Derived and Reflected Centrality**
 
 There are no standard routines in igraph or statnet to calculate the **derived** and **relected** centrality scores. Instead, we need to extract the underlying network adjacency matrix and run some simple matrix operations on the extracted matrix. The basic intution is that these two scores together comprise the Eigenvector centrality score, and thus we can parse them out manually.
 
@@ -265,7 +265,7 @@ If total centraltiy is 1, then derived centrality is simply 1 - the proportion o
 imf2014.nodes$eigen.dc<-imf2014.nodes$eigen*imf2014.nodes$dc
 ```
 
-##**Compare Centrality Scores**
+## **Compare Centrality Scores**
 
 We built the node measure dataframes above, now lets sort and inspect.
 ```{r, echo=TRUE}
@@ -283,7 +283,7 @@ We can also use the tidyverse command `filter` to select particular cases to vie
 filter(imf2014.nodes,name=="Costa Rica")
 ```
 
-###Exercise: Compare Centrality Scores
+### Exercise: Compare Centrality Scores
 
 ```{r idcountries, exercise=TRUE}
 #compare centrality scores for Belgium and Italy
@@ -295,7 +295,7 @@ filter(imf2014.nodes,name=="Costa Rica")
 filter(imf2014.nodes,name%in%c("Belgium","Italy"))
 ```
 
-##ADVANCED: Centrality Score Distributions
+## ADVANCED: Centrality Score Distributions
 
 Let's look at the distributions of these scores. While we could use the `hist` command multiple times to visualize each node score separately, using tidyr and ggplot2 provides an easier solution to view the distribution of all variables in the dataset at once. We first reshape the dataset, then use ggplot grouping by variable name. The ggplot2 histogram commands are introduced in the BasicData tutorial.
 
@@ -308,7 +308,7 @@ imf2014.nodes%>%
     facet_wrap(~key, scales = "free")
 ```
 
-###Exercise: Inspect Distributions of Centrality Measures
+### Exercise: Inspect Distributions of Centrality Measures
 
 Using the same approach, can you inspect the distribution of centrality scores in the imf100 dataset? How about the gotbook dataset or gotlike dataset? What similarities and differences do you find?
 
@@ -340,7 +340,7 @@ gotlike.nodes%>%
     ggtitle("Got like/Dislike")
 ```
 
-##ADVANCED: Centrality Measure Correlations
+## ADVANCED: Centrality Measure Correlations
 
 Another neat way to see how related the scores are to one another is to find correlations between all of them and then visualize. Traditionally, this is a difficult step in data exploration and takes a lot of manual manipulation. A new package, corrr, adopts the tidyverse approach to exploring correlations. [See the original blogpost by Simon Jackson for more information.](https://drsimonj.svbtle.com/exploring-correlations-in-r-with-corrr) The commands just automatically take care of lots of things that you would otherwise need to do manually.
 Let's look at the correlations between all scores now.
@@ -357,7 +357,7 @@ fashion(temp)
 rplot(temp)
 ```
 
-###Exercise: Check Correlations of Centrality Measures
+### Exercise: Check Correlations of Centrality Measures
 
 Try creating a similar plot for one or more of the other networks using the correct node measure dataframes.
 
@@ -366,21 +366,21 @@ Try creating a similar plot for one or more of the other networks using the corr
 ```
 
 ```{r centralcorr-solution, echo=FALSE}
-## imf100 dataset
+##  imf100 dataset
 temp<-imf100.nodes %>% 
   select(totdegree,indegree,outdegree,eigen,eigen.rc,eigen.dc,bonpow)%>%
   correlate() %>%
   rearrange()
   fashion(temp)
   rplot(temp)
-## gotbook dataset
+##  gotbook dataset
 temp<-gotbook.nodes %>% 
   select(degree,eigen,eigen.rc,eigen.dc)%>%
   correlate() %>%
   rearrange()
 fashion(temp)
   rplot(temp)
-## gotlike dataset
+##  gotlike dataset
 temp<-gotlike.nodes %>% 
   select(totdegree,indegree,outdegree,eigen,eigen.rc,eigen.dc,bonpow)%>%
   correlate() %>%

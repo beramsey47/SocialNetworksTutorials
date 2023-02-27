@@ -16,7 +16,7 @@ load("Week5.rdata")
 tutorial_options(exercise.timelimit = 10)
 ```
 
-##**Introduction**
+## **Introduction**
 
 This tutorial will demonstrate use of the R commands used to measure aspects of network brokerage introduced in Week 5's Lecture:
 
@@ -37,7 +37,7 @@ For those who are interested, exercises can also be completed using the GoT book
 - *gotbook.ig* - igraph network object
 - *gotbook.stat* - statnet network object
 
-##**Basic Network Description**
+## **Basic Network Description**
 
 1. Inspect the basic **network descriptors** for the `climpref`, `climinfl` and `gotbook` networks. For this exercise, refer to Week 1 tutorial. This will help you get familiar with the dataset you are using.
 
@@ -54,7 +54,7 @@ Find network size, type (un/directed, un/weighted, bipartite) and available attr
 ```
 
 
-##**Creating a dataframe of centrality scores**
+## **Creating a dataframe of centrality scores**
 
 Using tutorials 3 and 4 as a guide--specifically sections 3 and 4 of tutorial 4-- create a dataframe of the degree and centrality values that we have already learned about for the three datasets in this tutorial. Call them `climinfl.nodes`, `climpref.nodes` and `gotbook.nodes`. Use the statnet versions of these datasets to attach the values. 
 
@@ -64,7 +64,7 @@ Using tutorials 3 and 4 as a guide--specifically sections 3 and 4 of tutorial 4-
 #head(xxx.nodes) for each dataset to view the top 5 values
 ```
 
-##**Calculate closeness centrality**
+## **Calculate closeness centrality**
 
 The closeness centrality of a node is defined as the sum of the geodesic distances between that node and all other nodes in a network. Lets start by just inspecting the closeness scores obtained using the two programs. Because geodesic distance depends on whether or not the network is directed, it is important to get this option correctly specified. In statnet, the option that must be specified is `gmode=("digraph", "graph")`, with "digraph" as the default. In igraph, the option is `mode=("in","out", "all", "total")` without a clear default option. If the network is undirected, then `mode=` is ignored. Weights, if available as the *weight* edge attribute or specified using the `weight=` option, are used in the calculation of distance.
 
@@ -91,7 +91,7 @@ head(sna::closeness(climpref.stat, gmode="graph", cmode="suminvundir", ignore.ev
 
 However, it turns out that statnet/sna still ignores the edge weights. This is probably reasonable behavior, unless we are comfortable with the interpretation of weighted geodesic distance. If so, igraph will calculate closeness using weighted geodesic distance.
 
-###Exercise: Closeness Centrality
+### Exercise: Closeness Centrality
 
 Using either igraph or statnet, calculate closeness **centrality** scores for the swiss influence network and gotbook network. Can you also add these scores onto the `.nodes` dataframes you created above?
 
@@ -112,7 +112,7 @@ climinfl.nodes$close<-sna::closeness(climinfl.stat, cmode="suminvdir")
 gotbook.nodes$close<-sna::closeness(gotbook.stat, gmode="graph", cmode="suminvundir")
 ```
 
-##**Closeness Centralization**
+## **Closeness Centralization**
 In addition to node-level centrality scores, we can also calculate the network level **centralization** index for closeness centrality measures. The network centralization index must be extracted from the longer list of items returned by the igraph command `centr_clo()`, with similar options to the ones specified in the igraph `closeness()` command. Statnet uses a generic centralization index command, `centralization()`, but the measure desired for the network-level score must be specified as we have seen in prior weeks.
 
 ```{r, echo=TRUE}
@@ -122,7 +122,7 @@ centr_clo(climpref.ig)$centralization
 centralization(climpref.stat,FUN="closeness",mode="graph")
 ```
 
-###Exercise: Closeness Centralitzation
+### Exercise: Closeness Centralitzation
 
 Calculate closeness centralization scores for the climate influence and gotbook networks.
 
@@ -140,7 +140,7 @@ centralization(climinfl.stat,FUN="closeness",mode="graph")
 centralization(gotbook.stat,FUN="closeness",mode="graph")
 ```
 
-##**Calculate Betweenness Centrality**
+## **Calculate Betweenness Centrality**
 
 Betweenness is defined as the number of geodesics on which a node sits. Remember, a geodesic is (if any) the shortest path(s) between any two nodes.
 
@@ -157,7 +157,7 @@ It is clear that the difference between the two is likely due to the use of weig
 head(igraph::betweenness(climpref.ig, directed=FALSE, weights=NA))
 ```
 
-###Exercise: Betweenness Centrality
+### Exercise: Betweenness Centrality
 
 Using either igraph or statnet, calculate closeness centrality scores for the swiss influence network and gotbook network. Can you also add these scores onto the `.nodes` dataframes you created above?
 
@@ -179,13 +179,13 @@ climinfl.nodes$between<-
 gotbook.nodes$between<-
   sna::betweenness(gotbook.stat, gmode="graph")
 
-##View the highest betweenness scores to answer the assignment:
+## View the highest betweenness scores to answer the assignment:
 gotbook.nodes%>%
   arrange(desc(between))%>%
   slice(1:5)
 ```
 
-##**Betweenness Centralization**
+## **Betweenness Centralization**
 In addition to node-level centrality scores, we can also calculate the network level centralization index for betweenness measures. The network centralization index must be extracted from the longer list of items returned by the igraph command `centr_betw()`. Statnet uses a generic centralization index command, `centralization()`, but the measure desired for the network-level score must be specified as we have seen in prior weeks.
 
 ```{r, echo=TRUE}
@@ -196,7 +196,7 @@ centralization(climpref.stat,FUN="betweenness",mode="graph")
 ```
 Note that the same centralization index is calculated despite the different treatment of edge weights.
 
-###Exercise: Betweeness Centralization
+### Exercise: Betweeness Centralization
 
 Calculate betweeness centralization scores for the climate influence and gotbook networks.
 
@@ -222,7 +222,7 @@ Constraint is a measure of the redundancy of a node's connections. It is bound b
 constraint(climpref.ig)
 ```
 
-###Exercise: Network Constraint
+### Exercise: Network Constraint
 
 Using the `constraint()` function, calculate network constraint scores for the actors in the swiss influence network and gotbook network. Can you also add these scores onto the *.nodes* dataframes you created above? Can you find the nodes with highest and lowest constraint?
 
@@ -254,7 +254,7 @@ arrange(gotbook.nodes, constraint)%>%slice(1:5)
 arrange(gotbook.nodes, desc(constraint))%>%slice(1:5)
 ```
 
-##**Gould-Fernandez Brokerage**
+## **Gould-Fernandez Brokerage**
 
 Gould-Fernandez brokerage is calculated with respect not only to the pattern of ties between vertices, but also the identities of those vertices as captured in a node attribute. For the climate network, we will use organization type in 5 categories (orgtype5) as the relevant vertex attribute to calculate brokerage. Note that Gould-Fernandex brokerage also requires directed ties. Therefore, Gould-Fernandex brokerage scores can only be calculated for directed networks with vertex attributes, and the `brokerage()` function is only available in statnet.
 
@@ -281,7 +281,7 @@ climinfl.nodes<-climinfl.nodes %>%
          broker.lia = temp$b_O)
 ```
 
-###Exercise: Brokerage
+### Exercise: Brokerage
 
 In order to interpret the brokerage scores, let's look again at the `trade100` dataset. The dataframe that you've created with the degree, centralization and brokerage scores for the nodes has been created for you in this tutorial. The brokerage scores for this dataset are used with the vertex attribute 'Continent'. Let's analyze the first and last 10 nodes of this dataset. To do this, use the `arrange` function piped though the `slice` function. We introduced these in Tutorial 3.  
 
@@ -291,12 +291,12 @@ In order to interpret the brokerage scores, let's look again at the `trade100` d
 ```
 
 ```{r broke2-solution, echo=FALSE}
-##arrange in descending order
+## arrange in descending order
 trade100.nodes%>%
   arrange(desc(broker.tot))%>%
   slice(1:10)
 
-##arrange in ascending order (default, doesn't need specification)
+## arrange in ascending order (default, doesn't need specification)
 trade100.nodes%>%
   arrange(broker.tot)%>%
   slice(1:10)
@@ -306,7 +306,7 @@ trade100.nodes%>%
 
  What do you notice about the states with the highest and lowest brokerage values? Can you make any hypotheses based on these scores?
 
-##**Correlations of Centrality Measures**
+## **Correlations of Centrality Measures**
 
 In tutorial 4, we used histograms to inspect the distribution of centrality scores. Can you inspect the distribution of centrality scores in the trade100 dataset? How about the gotbook dataset or both climate datasets? What similarities and differences do you find?
 
@@ -359,7 +359,7 @@ fashion(correlations)
 rplot(correlations)
 ```
 
-###Exercise: Correlations of Centrality Measures
+### Exercise: Correlations of Centrality Measures
 
 Try creating a similar plot for one or more of the other networks using the correct node measure dataframes.
 
