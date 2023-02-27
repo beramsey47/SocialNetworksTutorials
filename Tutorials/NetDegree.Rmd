@@ -2,6 +2,9 @@
 title: "Tutorial: Network Degree, Week 3"
 output: learnr::tutorial
 runtime: shiny_prerendered
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -15,36 +18,49 @@ df<-data.frame(scores=c(55,23,48,3,112,14,25), type=c("A", "B", "A", "B","B","A"
 tutorial_options(exercise.timelimit = 10)
 ```
 
-##**Introduction**
-This tutorial will demonstrate use of the R commands used to measure aspects of network data introduced in Week 3's Lecture:
+\##**Introduction** This tutorial will demonstrate use of the R commands
+used to measure aspects of network data introduced in Week 3's Lecture:
 
-* Network density
-* Vertex degree
-  * Vertex degree in directed networks
-  * Vertex degree summary statistics
-  * Vertex degree distribution
-  * Identifying outlier nodes
-* Network centralization
+-   Network density
+-   Vertex degree
+    -   Vertex degree in directed networks
+    -   Vertex degree summary statistics
+    -   Vertex degree distribution
+    -   Identifying outlier nodes
+-   Network centralization
 
-We will be using two datasets for this exercise. The first, Swiss Climate Influence network, was used in the Week 2 tutorial. The climate data includes 'loops', or ties from a node to itself because some states have nominated themselves. This will affect some of our calculations, but we will get to that later. The second is taken from the trade data included with the Corrrelates of War data, and the original data is based on annual trade flows between nation-states in 2007. From the description: "The dyadic trade dataset describes import and export data in current U.S. dollars for pairs of sovereign states."
+We will be using two datasets for this exercise. The first, Swiss
+Climate Influence network, was used in the Week 2 tutorial. The climate
+data includes 'loops', or ties from a node to itself because some states
+have nominated themselves. This will affect some of our calculations,
+but we will get to that later. The second is taken from the trade data
+included with the Corrrelates of War data, and the original data is
+based on annual trade flows between nation-states in 2007. From the
+description: "The dyadic trade dataset describes import and export data
+in current U.S. dollars for pairs of sovereign states."
 
-- *climate.ig* - igraph network object
-- *climate.stat* - statnet network object
-- *trade2007.ig* - igraph network object
-- *trade2007.stat* - statnet network object
-- *trade100.stat* - (0/1) tie when nation imports >100million
+-   *climate.ig* - igraph network object
+-   *climate.stat* - statnet network object
+-   *trade2007.ig* - igraph network object
+-   *trade2007.stat* - statnet network object
+-   *trade100.stat* - (0/1) tie when nation imports \>100million
 
-##**Basic Network Description**
+\##**Basic Network Description**
 
-Inspect the basic network descriptors for the `trade2007` network. For this exercise, refer to tutorials from Weeks 1 and 2. This will help you get familiar with the dataset you are using.
+Inspect the basic network descriptors for the `trade2007` network. For
+this exercise, refer to tutorials from Weeks 1 and 2. This will help you
+get familiar with the dataset you are using.
 
-1. **Describe the Network:** Find network size, type (un/directed, un/weighted, bipartite) and available attributes of vertices and edges
+1.  **Describe the Network:** Find network size, type (un/directed,
+    un/weighted, bipartite) and available attributes of vertices and
+    edges
 
 ```{r describe, exercise=TRUE}
 #Find network size and type
 ```
 
-2. **Dyad Census:** Now, use the tutorial from Week 2 to insepect the dyads in the network. 
+2.  **Dyad Census:** Now, use the tutorial from Week 2 to insepect the
+    dyads in the network.
 
 ```{r dyad, exercise=TRUE}
 #Classify all dyads in the network
@@ -59,7 +75,8 @@ igraph::dyad.census(trade2007.ig)
 sna::dyad.census(trade2007.stat)
 ```
 
-3. **Triad Census:** Are there any interesting patterns for triads in the network?
+3.  **Triad Census:** Are there any interesting patterns for triads in
+    the network?
 
 ```{r triad_climate, exercise=TRUE}
 #Classify all triads in the network
@@ -74,8 +91,8 @@ igraph::triad.census(trade2007.ig)
 sna::triad.census(trade2007.stat)
 ```
 
-
-4. **Clustering and Transitivity**: Calculate the global and average clustering coefficient, as well as the network transitivity.
+4.  **Clustering and Transitivity**: Calculate the global and average
+    clustering coefficient, as well as the network transitivity.
 
 ```{r cluster, exercise=TRUE, exercise.lines=6}
 #get global clustering cofficient: igraph
@@ -95,7 +112,8 @@ transitivity(trade2007.ig, type="average")
 gtrans(trade2007.stat)
 ```
 
-5. **Component Structure and Isolates**: Inspect the component structure of the network. Are there any isolates?
+5.  **Component Structure and Isolates**: Inspect the component
+    structure of the network. Are there any isolates?
 
 ```{r structure, exercise=TRUE, exercise.lines=4}
 #get number of components
@@ -109,9 +127,13 @@ igraph::components(trade2007.ig)$no #Number of components
 igraph::components(trade2007.ig)$csize #Size of each component
 ```
 
-##**Density**
+\##**Density**
 
-The *density* of a network is defined as the proportion of ties present out of all possible ties in a network. Note that the network density command ignores edge values at present. If loops are present or there are multiple edges between two nodes, then the results may not make sense.
+The *density* of a network is defined as the proportion of ties present
+out of all possible ties in a network. Note that the network density
+command ignores edge values at present. If loops are present or there
+are multiple edges between two nodes, then the results may not make
+sense.
 
 ```{r, echo=TRUE}
 #get network density: igraph
@@ -121,14 +143,31 @@ graph.density(climate.ig)
 network.density(climate.stat)
 ```
 
-The output for the two packages is different. A closer look at the data suggests that a major different between them is how the two density calculations deal with "loops" - or ties from an actor to themselves. Some - but not all - actors in the climate network nominate themselves. (32 of 34 actors) It appears that `network.density` recognizes that loops are possible, while Igraph provides an incorrect density calculation as the default assumes that loops are not included but does not remove them. Therefore, the default calculation includes the loops in the numerator but not the denominator of the density calculation. After including the option `loops=TRUE`, Igraph provides an updated answer that accounts for loops in both numerator and denominator, same as the answer given by `network.density`.
+The output for the two packages is different. A closer look at the data
+suggests that a major different between them is how the two density
+calculations deal with "loops" - or ties from an actor to themselves.
+Some - but not all - actors in the climate network nominate themselves.
+(32 of 34 actors) It appears that `network.density` recognizes that
+loops are possible, while Igraph provides an incorrect density
+calculation as the default assumes that loops are not included but does
+not remove them. Therefore, the default calculation includes the loops
+in the numerator but not the denominator of the density calculation.
+After including the option `loops=TRUE`, Igraph provides an updated
+answer that accounts for loops in both numerator and denominator, same
+as the answer given by `network.density`.
 
 ```{r, echo=TRUE}
 #get network density without loops: igraph
 graph.density(climate.ig, loops=TRUE)
 ```
 
-Thre are often good reasons to ignore self-nominations even when they are present, however. The `gden` command includes loops but has an option to ignore the diagonal. Then it calculates density as all ties between actors $i$ and $j$ - so not including self-nominations. *Note: `gden()` and `network.density()` deal with missing edges differently. The former omits missing edges from numerator but not denominator, the latter omits from both.*
+Thre are often good reasons to ignore self-nominations even when they
+are present, however. The `gden` command includes loops but has an
+option to ignore the diagonal. Then it calculates density as all ties
+between actors $i$ and $j$ - so not including self-nominations. *Note:
+`gden()` and `network.density()` deal with missing edges differently.
+The former omits missing edges from numerator but not denominator, the
+latter omits from both.*
 
 ```{r, echo=TRUE}
 #get network density without loops: statnet
@@ -137,7 +176,13 @@ gden(climate.stat, diag=FALSE)
 
 ###Exercise: Network Density
 
-Calculate network density for the trade2007 network. Given the attributes of this network, does it matter which package you use for this calculation? Based on the loops explanation for the climate output, could this account for the difference? What else could be going on? You may want to go back and look carefully at both versions of the trade2007 network. Does the answer change if you use the binary network where ties exist only if trade is more than 100 million?
+Calculate network density for the trade2007 network. Given the
+attributes of this network, does it matter which package you use for
+this calculation? Based on the loops explanation for the climate output,
+could this account for the difference? What else could be going on? You
+may want to go back and look carefully at both versions of the trade2007
+network. Does the answer change if you use the binary network where ties
+exist only if trade is more than 100 million?
 
 ```{r density, exercise=TRUE}
 #get network density: igraph or statnet
@@ -155,9 +200,13 @@ network.density(trade2007.stat)
 network.density(trade100.stat)
 ```
 
-##**Vertex Degree**
+\##**Vertex Degree**
 
-One measure of node centrality or popularity is node degree: a count of the relationships that a node is involved in or the count of the edges that are incident to a vertex. Vertex degree is a description of an individual node; each vertex in a network may have a different node degree.
+One measure of node centrality or popularity is node degree: a count of
+the relationships that a node is involved in or the count of the edges
+that are incident to a vertex. Vertex degree is a description of an
+individual node; each vertex in a network may have a different node
+degree.
 
 ```{r, echo=TRUE}
 #Calculate average network degree: igraph
@@ -167,24 +216,46 @@ igraph::degree(climate.ig)
 sna::degree(climate.stat)
 ```
 
-Two differences between the two commands are clearly visible. First, `sna::degree` ignores loops or self-nominations, while `igraph::degree` includes loops. Including the option `loops=FALSE` in the `igraph::degree` command will make the two commands equivalent for this data set. Note that setting `diag=TRUE` in `sna::degree` does not guarentee equivalence as statnet only single counts the loops in a directed network, while igraph double-counts the loops.
+Two differences between the two commands are clearly visible. First,
+`sna::degree` ignores loops or self-nominations, while `igraph::degree`
+includes loops. Including the option `loops=FALSE` in the
+`igraph::degree` command will make the two commands equivalent for this
+data set. Note that setting `diag=TRUE` in `sna::degree` does not
+guarentee equivalence as statnet only single counts the loops in a
+directed network, while igraph double-counts the loops.
 
-Second, the Igraph command also provides node name along with node degree, which can be helpful if you would like to know the degree of a particular node. As you can imagine, however, this list can be quite difficult to interpret in datasets with 100s or 1000s of nodes or when nodes have long names. Therefore, we rarely use the degree command to list the degree of all nodes, but instead use the network degree command to:
+Second, the Igraph command also provides node name along with node
+degree, which can be helpful if you would like to know the degree of a
+particular node. As you can imagine, however, this list can be quite
+difficult to interpret in datasets with 100s or 1000s of nodes or when
+nodes have long names. Therefore, we rarely use the degree command to
+list the degree of all nodes, but instead use the network degree command
+to:
 
-* compute network summary statistics, such as average network degree
-* graph the network degree distribution, or
-* identify particular nodes, such as the five nodes with the most contacts.
+-   compute network summary statistics, such as average network degree
+-   graph the network degree distribution, or
+-   identify particular nodes, such as the five nodes with the most
+    contacts.
 
-##**Review: Create a DataFrame**
+\##**Review: Create a DataFrame**
 
-Regardless of the way(s) in which we plan to use network degree meaures, it will be useful to store vertex attributes such as degree in a table of node attributes. This table, or data frame,  of node measures can even be used in traditional econometric models that include network structure variables. Here is an example of the basic R command to create a dataframe with named variables `names` and `degree`, and row names set as the entries in the `names` variable. For more details, see the tutorial *Basic.Dataframe*.
+Regardless of the way(s) in which we plan to use network degree meaures,
+it will be useful to store vertex attributes such as degree in a table
+of node attributes. This table, or data frame, of node measures can even
+be used in traditional econometric models that include network structure
+variables. Here is an example of the basic R command to create a
+dataframe with named variables `names` and `degree`, and row names set
+as the entries in the `names` variable. For more details, see the
+tutorial *Basic.Dataframe*.
 
 ```{r, echo=TRUE, eval=FALSE}
 # create a dataset of vertex names and degree: igraph
 climate.nodes<-data.frame(name=V(climate.ig)$name, degree=igraph::degree(climate.ig))
 ```
 
-Here are the same commands in igraph, but not evaluated to avoid repitition.
+Here are the same commands in igraph, but not evaluated to avoid
+repitition.
+
 ```{r, echo=TRUE}
 # create a dataset of vertex names and degree: statnet
 climate.nodes<-data.frame(name=climate.stat%v%"vertex.names", degree=sna::degree(climate.stat))
@@ -194,15 +265,18 @@ climate.nodes
 
 For those who need a quick breakdown of what these commands do:
 
-* `climate.nodes` is a dataframe that we are creating within R. 
-* `names` and `degree` are two variables (columns) in `climate.nodes`
-* the `names` variable is made up of the vertex names from `climate.ig` or `climate.statnet`
-* the `degree` variable is calculated from the climate dataset.
-* head() returns the first
+-   `climate.nodes` is a dataframe that we are creating within R.
+-   `names` and `degree` are two variables (columns) in `climate.nodes`
+-   the `names` variable is made up of the vertex names from
+    `climate.ig` or `climate.statnet`
+-   the `degree` variable is calculated from the climate dataset.
+-   head() returns the first
 
 ###Exercise: Create a dataframe
 
-You can do the same thing with the `trade2007` dataset. The goal is to create a dataframe of names and degrees, so using the code above, simply replace the climate elements with trade2007
+You can do the same thing with the `trade2007` dataset. The goal is to
+create a dataframe of names and degrees, so using the code above, simply
+replace the climate elements with trade2007
 
 ```{r df, exercise=TRUE}
 # create a dataset of vertex names and degree: igraph or statnet
@@ -222,10 +296,14 @@ trade2007.nodes ##return the dataframe
 
 ```
 
+\##**Degree in Directed Networks**
 
-##**Degree in Directed Networks**
-
-In a directed network, it is possible to calculate both *indegree* or the total number of nodes that send a tie to the focal node, and *outdegree*, or the total number of nodes to which the focal node sends a tie. R allows you to specify whether you want to calculate in-degree, out-degree or total degree when working with a directed network. By default, the function `degree` produces a count of total degree.
+In a directed network, it is possible to calculate both *indegree* or
+the total number of nodes that send a tie to the focal node, and
+*outdegree*, or the total number of nodes to which the focal node sends
+a tie. R allows you to specify whether you want to calculate in-degree,
+out-degree or total degree when working with a directed network. By
+default, the function `degree` produces a count of total degree.
 
 ```{r, echo=TRUE}
 #calculate in-degree: statnet
@@ -234,7 +312,8 @@ sna::degree(climate.stat, cmode="indegree")
 sna::degree(climate.stat, cmode="outdegree")
 ```
 
-Here are the same commands in igraph, but not evaluated to avoid repitition.
+Here are the same commands in igraph, but not evaluated to avoid
+repitition.
 
 ```{r, echo=TRUE, eval=FALSE}
 #calculate in-degree: igraph
@@ -243,7 +322,12 @@ igraph::degree(climate.ig,mode="in", loops = FALSE)
 igraph::degree(climate.ig,mode="out", loops = FALSE)
 ```
 
-To make use of these calculations, you'll want to attach them to the dataframe you created in the last exercise. To do this, we can use the mutate command to add columns onto the `climate.nodes` object created before. See **Basic.Dataframe** tutorial for an introduction. Note that we can separate multiple variable create commands within `mutate` with a comma.
+To make use of these calculations, you'll want to attach them to the
+dataframe you created in the last exercise. To do this, we can use the
+mutate command to add columns onto the `climate.nodes` object created
+before. See **Basic.Dataframe** tutorial for an introduction. Note that
+we can separate multiple variable create commands within `mutate` with a
+comma.
 
 ```{r, echo=TRUE}
 #statnet version:
@@ -253,7 +337,10 @@ climate.nodes<-climate.nodes %>%
 
 climate.nodes
 ```
-Here are the same commands in igraph, but not evaluated to avoid repitition.
+
+Here are the same commands in igraph, but not evaluated to avoid
+repitition.
+
 ```{r, echo=TRUE, eval=FALSE}
 #igraph version:
 climate.nodes<-climate.nodes %>%
@@ -261,8 +348,12 @@ climate.nodes<-climate.nodes %>%
            outdegree=igraph::degree(climate.ig, mode="out", loops=FALSE))
 ```
 
-###Exercise
-Now, do the same for the trade2007 network. create a dataframe that includes all three measures of degree: total degree, indegree, and outdegree. To do this, you'll simply need to add the codes of `totdegree`, `indegree` and `outdegree` to replace the initial `degree` column. You don't need to evaluate the degrees before attaching them to the dataframe. 
+###Exercise Now, do the same for the trade2007 network. create a
+dataframe that includes all three measures of degree: total degree,
+indegree, and outdegree. To do this, you'll simply need to add the codes
+of `totdegree`, `indegree` and `outdegree` to replace the initial
+`degree` column. You don't need to evaluate the degrees before attaching
+them to the dataframe.
 
 ```{r degree2, exercise=TRUE}
 #attach the in, out, and total degree values to the dataframe
@@ -290,7 +381,9 @@ trade2007.nodes
 
 ##Network Degree Summary Statistics
 
-What does the distribution of these scores look like? We can use the basic `summary` command to find the range, mean, median and standard deviation of a vector.
+What does the distribution of these scores look like? We can use the
+basic `summary` command to find the range, mean, median and standard
+deviation of a vector.
 
 ```{r, echo=TRUE}
 #create a vector with the numbers 1 to 10
@@ -299,7 +392,9 @@ v<-c(1:10)
 summary(v)
 ```
 
-Now, we can use the same command to get basic summaries for all the columns in a dataframe. In this case, we will get summary statistics for the climate network node attributes.
+Now, we can use the same command to get basic summaries for all the
+columns in a dataframe. In this case, we will get summary statistics for
+the climate network node attributes.
 
 ```{r, echo=TRUE}
 #get summary statistics for node attributes
@@ -308,7 +403,8 @@ summary(climate.nodes)
 
 ###Exercise: Summary Statistics
 
-Try getting summary statistics for node degree in the 2007 trade network.
+Try getting summary statistics for node degree in the 2007 trade
+network.
 
 ```{r summ, exercise=TRUE}
 #get summary statistics for trade network node attributes
@@ -320,8 +416,10 @@ summary(trade2007.nodes)
 
 ```
 
-###ADVANCED Exercise
-Try getting summary statistics for node degree for the binary network degree, creating the appropriate dataframe in this exercise and getting the summary. Unlike other exercises, we do not provide the correct dataframe for you to access!
+###ADVANCED Exercise Try getting summary statistics for node degree for
+the binary network degree, creating the appropriate dataframe in this
+exercise and getting the summary. Unlike other exercises, we do not
+provide the correct dataframe for you to access!
 
 ```{r summadv, exercise=TRUE}
 #get summary statistics for binary trade100 network node attributes
@@ -338,7 +436,12 @@ summary(data.frame(name=trade100.stat%v%"vertex.names",
 
 ##ADVANCED: Summarise by Group
 
-There are often times when we may want to know about groups of nodes, not everyone in the network. For example, maybe we care about average network characteristics of characters in the game of thrones grouped by family or age.  Here is a basic example of creating summary statistics for groups, see **Basic.Dataframe** or https://dplyr.tidyverse.org/ for further details.
+There are often times when we may want to know about groups of nodes,
+not everyone in the network. For example, maybe we care about average
+network characteristics of characters in the game of thrones grouped by
+family or age. Here is a basic example of creating summary statistics
+for groups, see **Basic.Dataframe** or <https://dplyr.tidyverse.org/>
+for further details.
 
 ```{r, echo=TRUE}
 #ADVANCED: summarise by type
@@ -349,7 +452,8 @@ df%>%
 
 ###Exercise
 
-Try attaching the "type5" attribute to the climate node dataframe. Can you `summarise` the data after grouping by organization `type`?
+Try attaching the "type5" attribute to the climate node dataframe. Can
+you `summarise` the data after grouping by organization `type`?
 
 ```{r advanced, exercise=TRUE}
 ```
@@ -364,10 +468,14 @@ climate.nodes%>%
    summarise_all(.,funs(mean,n()))
 ```
 
-##Network Degree Distribution
-The command `hist` is a basic R command that draws a histogram of vector of data. We can set options such as `main` for the main title of the histogram and `xlab` for the label of the x-axis. Here is a toy example.
+##Network Degree Distribution The command `hist` is a basic R command
+that draws a histogram of vector of data. We can set options such as
+`main` for the main title of the histogram and `xlab` for the label of
+the x-axis. Here is a toy example.
 
-Let's check out the histogram for the distribution of node degree for the climate network. What do you make of the differences in the two histograms?
+Let's check out the histogram for the distribution of node degree for
+the climate network. What do you make of the differences in the two
+histograms?
 
 ```{r, echo=TRUE}
 #create a histogram of Climate Influence Indegree
@@ -376,8 +484,8 @@ hist(climate.nodes$indegree, main="Climate Influence: In-degree Distribution", x
 hist(climate.nodes$outdegree, main="Climate Influence: Out-degree Distribution ", xlab="Nominations made")
 ```
 
-###Exercise
-Now, try creating histograms of in and out degree for the 2007 trade network.
+###Exercise Now, try creating histograms of in and out degree for the
+2007 trade network.
 
 ```{r hist, exercise=TRUE}
 
@@ -390,7 +498,16 @@ hist(trade2007.nodes$outdegree, main="2007 Trade Flows: Out-degree Distribution 
 ```
 
 ## Network degree centralization
-We can also calculate a network-level centralization score based on actor degree scores. The statnet command is a little more straightforward, as the same `centralization` command is used to find network centralization regardless of which measure you of centralization you are interested in (e.g., degree, betweeness, closeness, eigenvalue, etc). All you need to do is specify the `degree` option to calculate degree centralization, and use the same options as used in the `degree` command. What might be the interpretation of different centralization scores for in-degree and out-degree in the climate network?
+
+We can also calculate a network-level centralization score based on
+actor degree scores. The statnet command is a little more
+straightforward, as the same `centralization` command is used to find
+network centralization regardless of which measure you of centralization
+you are interested in (e.g., degree, betweeness, closeness, eigenvalue,
+etc). All you need to do is specify the `degree` option to calculate
+degree centralization, and use the same options as used in the `degree`
+command. What might be the interpretation of different centralization
+scores for in-degree and out-degree in the climate network?
 
 ```{r, echo=TRUE}
 #get network centralization score: statnet
@@ -398,7 +515,10 @@ centralization(climate.stat, degree, cmode="indegree")
 centralization(climate.stat, degree, cmode="outdegree")
 ```
 
-The `centr_degree` function returns an object with several components, we are interested in the `centralization` component. It requires specification of options as in the `igraph::degree` command used above. This code is not evaluated to avoid repitition.
+The `centr_degree` function returns an object with several components,
+we are interested in the `centralization` component. It requires
+specification of options as in the `igraph::degree` command used above.
+This code is not evaluated to avoid repitition.
 
 ```{r, echo=TRUE, eval=FALSE}
 #get network centralization score: igraph
@@ -408,7 +528,10 @@ centr_degree(climate.ig, loops = FALSE, mode="out")$centralization
 
 ###Exercise: Network degree centralization
 
-Calculate network degree centralization scores for both in-degree and out-degree using the 2007 trade network. Compare to the degree centralization scores for the binary trade network with a threshold of $100 million for a tie.
+Calculate network degree centralization scores for both in-degree and
+out-degree using the 2007 trade network. Compare to the degree
+centralization scores for the binary trade network with a threshold of
+\$100 million for a tie.
 
 ```{r central, exercise=TRUE}
 #get network degree centralization
@@ -422,12 +545,16 @@ centralization(trade100.stat, degree, cmode="indegree")
 centralization(trade100.stat, degree, cmode="outdegree")
 ```
 
-##**Identifying Specific Nodes**
-There may be times when we are interested in identifying and describing nodes with specific values, such as the nodes with the most or the fewest number of network ties. In order to identify these nodes, we will need to sort vectors and print out a subset of the possible nodes.
+\##**Identifying Specific Nodes** There may be times when we are
+interested in identifying and describing nodes with specific values,
+such as the nodes with the most or the fewest number of network ties. In
+order to identify these nodes, we will need to sort vectors and print
+out a subset of the possible nodes.
 
 ###Basic commands: sorting
 
-As a reminder, we use the `arrange` command to sort data objects in R. See the tutorial **Basics.Dataframe** for more details.
+As a reminder, we use the `arrange` command to sort data objects in R.
+See the tutorial **Basics.Dataframe** for more details.
 
 ```{r, echo=TRUE}
 #sort a vector
@@ -435,13 +562,18 @@ df<-data.frame(scores=c(55,23,48,3,112,14,25), type=c("A", "B", "A", "B","B","A"
 arrange(df,scores)
 ```
 
-Using the `desc()` option in `arrange` puts the largest values at the top of the list rather than the bottom.
+Using the `desc()` option in `arrange` puts the largest values at the
+top of the list rather than the bottom.
+
 ```{r}
 #sort largest numbers first
 arrange(df, desc(scores))
 ```
 
-Using the `slice(t)` command tells R to return only the tth row of the data object. In this case, we tell R to return rows 1,2 and 3 (1:3) of the data object arranging in descening order by scores - or the top three scores.
+Using the `slice(t)` command tells R to return only the tth row of the
+data object. In this case, we tell R to return rows 1,2 and 3 (1:3) of
+the data object arranging in descening order by scores - or the top
+three scores.
 
 ```{r}
 #only return 3 largest values
@@ -449,8 +581,10 @@ arrange(df, desc(scores))%>%
   slice(1:3)
 ```
 
-###Exercise: sorting
-Try sorting a vector of vertex degree for the climate data, and list the 5 nodes with the highest indegree. Can you also list the five nodes with the lowest indegree? How about the highest outdegree?
+###Exercise: sorting Try sorting a vector of vertex degree for the
+climate data, and list the 5 nodes with the highest indegree. Can you
+also list the five nodes with the lowest indegree? How about the highest
+outdegree?
 
 ```{r degree1, exercise=TRUE}
 #sort the indegree vector of nodes in the climate network
@@ -464,8 +598,8 @@ arrange(climate.nodes, desc(outdegree))%>%slice(1:5)
 arrange(climate.nodes, indegree)%>%slice(1:5)
 ```
 
-###Exercise 2
-Do the same thing for the `trade2007` dataset. For this, simply replace the dataframe name from the previous exercise:
+###Exercise 2 Do the same thing for the `trade2007` dataset. For this,
+simply replace the dataframe name from the previous exercise:
 
 ```{r degree3, exercise=TRUE}
 #sort the indegree vector of nodes in the trade2007 network
@@ -479,8 +613,9 @@ arrange(trade2007.nodes, desc(outdegree))%>%slice(1:5)
 arrange(trade2007.nodes, indegree)%>%slice(1:5)
 ```
 
-###ADVANCED Exercise
-Can you find the low and high degree nodes for the binary trade network? You will need to use some creativity in figuring out the best way to code this.
+###ADVANCED Exercise Can you find the low and high degree nodes for the
+binary trade network? You will need to use some creativity in figuring
+out the best way to code this.
 
 ```{r degreeadv, exercise=TRUE}
 #sort to find 5 highest and lowest degree nodes in trade100
@@ -505,4 +640,3 @@ temp%>%
   arrange(outdegree)%>%
   slice(1:5)
 ```
-

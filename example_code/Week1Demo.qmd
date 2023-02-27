@@ -157,3 +157,7 @@ plot.igraph(got_distance.net,
 ```
 
 ## Another Edgelist - Challenge!
+
+```{r}
+got_marriages.net <- graph_from_data_frame(got_marriages)
+```
